@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EsprinSync — 自建同步服务端：单个 Python 文件，操作日志即数据</title>
+    <meta name="description" content="自建同步服务端：多账户、操作日志、可复用 ID、令牌鉴权与管理后台，并托管网页版客户端。主体为单个 Python 文件，仅使用标准库，不连接任何外部服务。">
+    <meta name="theme-color" content="#0b0f14">
+    <meta property="og:title" content="EsprinSync — Note, Nothing.">
+    <meta property="og:description" content="单个 Python 文件（仅标准库）的自建同步服务端。同步以操作日志为单位追加，删除是明确的删除标记。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://esprinproject.github.io/Page/Sync/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/EsprinProject/Logos/main/Sync.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="https://raw.githubusercontent.com/EsprinProject/Logos/main/Sync.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/EsprinProject/Logos/main/Sync.png">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="./sync.css">
+    <noscript><style>.reveal { opacity: 1; transform: none; } .nav-toggle { display: none; }</style></noscript>
+    <script>
+        /* 首屏渲染前同步注入主题，与母站共用同一个偏好键 */
+        (function () {
+            var root = document.documentElement;
+
+            var stored = null;
+            try { stored = localStorage.getItem('en-site-theme'); } catch (e) { /* 隐私模式下忽略 */ }
+            var light = stored === 'light'
+                || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: light)').matches);
+            if (light) root.classList.add('light');
+        })();
+    </script>
+</head>
+<body>
+    <!-- 图标精灵：线宽与圆角对齐应用内 Material Symbols Rounded 的观感 -->
+    <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <symbol id="i-log" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h11"/><circle cx="19.5" cy="17.5" r="1.3"/></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14"/><path d="M9 7V4.5h6V7"/><path d="m6.6 7 .8 12.1a1 1 0 0 0 1 .9h7.2a1 1 0 0 0 1-.9L17.4 7"/></symbol>
+        <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+        <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8.5" cy="8.5" r="4"/><path d="m11.4 11.4 8.1 8.1"/><path d="m15.4 15.4 2-2"/><path d="m17.9 17.9 2-2"/></symbol>
+        <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+        <symbol id="i-folder" viewBox="0 0 24 24"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h3.2l1.8 2.2h8A1.5 1.5 0 0 1 20 9.7v8.3a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18V7.5Z"/></symbol>
+        <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h5M13 16h7"/><circle cx="15" cy="8" r="2"/><circle cx="11" cy="16" r="2"/></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.2 2.4 3.3 5.3 3.3 8.5S14.2 18.1 12 20.5c-2.2-2.4-3.3-5.3-3.3-8.5S9.8 5.9 12 3.5Z"/></symbol>
+        <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6.5" rx="2"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2"/><path d="M7 7.2h.01M7 16.7h.01"/></symbol>
+        <symbol id="i-drive" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2.5"/><path d="M3.5 12h17"/><path d="M7 15h.01M11 15h.01"/></symbol>
+        <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7.5 9.5 3 2.5-3 2.5"/><path d="M13.5 15h3.5"/></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.2-2.8 7.6-7 9-4.2-1.4-7-4.8-7-9V6l7-2.5Z"/><path d="m9 12.2 2.2 2.2 4.3-4.4"/></symbol>
+        <symbol id="i-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 5.8A2.8 2.8 0 0 0 12.7 3H6.8A2.8 2.8 0 0 0 4 5.8v5.9"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13"/><path d="m13 6.5 5.5 5.5L13 17.5"/></symbol>
+        <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m6.5 10.5 5.5-5.5 5.5 5.5"/></symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></symbol>
+        <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></symbol>
+        <symbol id="i-auto" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8 20h8M12 16.5V20"/></symbol>
+    </svg>
+
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <!-- 顶栏：全站唯一的固定导航 -->
+    <header class="site-header" id="top">
+        <div class="container header-inner">
+            <a class="brand" href="#top">
+                <img src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Sync.png" width="22" height="22" alt="">
+                <span class="brand-name">EsprinSync</span>
+            </a>
+
+            <nav class="site-nav" id="site-nav" aria-label="站点导航">
+                <a class="nav-link" href="../" title="EsprinProject 官网">EsprinProject</a>
+                <a class="nav-link" href="#features">特性</a>
+                <a class="nav-link" href="#model">模型</a>
+                <a class="nav-link" href="#storage">数据</a>
+                <a class="nav-link" href="#api">接口</a>
+                <a class="nav-link" href="#admin">后台</a>
+                <a class="nav-link" href="#deploy">部署</a>
+                <a class="nav-link" href="#clients">接入</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="icon-btn" id="btn-theme" type="button" title="主题：跟随系统（点击切换）" aria-label="主题：跟随系统（点击切换）">
+                    <svg class="icon sm" aria-hidden="true"><use href="#i-auto" id="theme-icon-use"/></svg>
+                </button>
+                <a class="icon-btn" href="https://github.com/EsprinProject/Sync" title="GitHub 仓库" aria-label="GitHub 仓库" target="_blank" rel="noopener">
+                    <svg class="icon sm fill" aria-hidden="true"><use href="#i-github"/></svg>
+                </a>
+                <a class="btn btn-ghost sm hide-sm header-web" href="https://esprinnemo.pages.dev" title="网页版" aria-label="网页版" target="_blank" rel="noopener">
+                    <svg class="icon xs" aria-hidden="true"><use href="#i-globe"/></svg>
+                    <span>网页版</span>
+                </a>
+                <a class="btn btn-primary sm hide-sm" href="#deploy">
+                    <svg class="icon xs" aria-hidden="true"><use href="#i-terminal"/></svg>
+                    <span>部署</span>
+                </a>
+                <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="打开导航菜单">
+                    <svg class="icon sm" aria-hidden="true"><use href="#i-menu"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端导航：与顶栏共用同一批锚点 -->
+        <div class="mobile-nav" id="mobile-nav" hidden>
+            <nav class="container" aria-label="站点导航（移动端）">
+                <a class="nav-link" href="../">EsprinProject</a>
+                <a class="nav-link" href="#features">01 特性</a>
+                <a class="nav-link" href="#model">02 模型</a>
+                <a class="nav-link" href="#storage">03 数据</a>
+                <a class="nav-link" href="#api">04 接口</a>
+                <a class="nav-link" href="#admin">05 后台</a>
+                <a class="nav-link" href="#deploy">06 部署</a>
+                <a class="nav-link" href="#clients">07 接入</a>
+                <a class="nav-link" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">网页版</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- 首屏：左文案 / 右启动输出，下方为规格条 -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <p class="eyebrow">自建同步服务端 · 单个 Python 文件 · 仅标准库</p>
+                    <h1 class="wordmark">EsprinSync</h1>
+                    <p class="tagline">Note, Nothing.</p>
+
+                    <p class="hero-lead">
+                        多账户、操作日志、可复用 ID、令牌鉴权与管理后台，并托管网页版客户端。
+                        数据以「操作（put / del）」为单位追加到日志，把日志从头重放一遍即为全部数据。
+                    </p>
+                    <p class="hero-sub">
+                        主体为 <code>sync.py</code>，除 Python 3 标准库外没有依赖，不连接任何外部服务；
+                        未配置凭据时同步接口一律返回 401。
+                    </p>
+
+                    <div class="hero-actions">
+                        <a class="btn btn-primary lg" href="#deploy">
+                            <svg class="icon" aria-hidden="true"><use href="#i-terminal"/></svg>
+                            <span>部署与运行</span>
+                        </a>
+                        <a class="btn btn-ghost lg" href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">
+                            <svg class="icon fill" aria-hidden="true"><use href="#i-github"/></svg>
+                            <span>查看源码</span>
+                        </a>
+                        <a class="btn btn-ghost lg" href="#clients">
+                            <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>
+                            <span>客户端接入</span>
+                        </a>
+                    </div>
+                    <p class="hero-note">服务端不保存以服务端为准的笔记副本 · 客户端只记录「已应用到第几号」</p>
+                </div>
+
+                <figure class="frame hero-frame">
+                    <div class="frame-bar">
+                        <span class="frame-dot" aria-hidden="true"></span>
+                        <span class="frame-title">python sync.py · 启动输出</span>
+                    </div>
+                    <div class="frame-body frame-static">
+                        <pre class="term"><span class="lv">[INFO]</span> [Server] 启动 EsprinSync v1
+<span class="lv">[INFO]</span> [Server] listen=127.0.0.1:8686 hostSource=default portSource=default
+<span class="lv">[INFO]</span> [Sync] endpoint=/sync/* origin=http://127.0.0.1:8686
+<span class="lv">[INFO]</span> [Admin] endpoint=/admin dir=/srv/esprin/manager api=/admin/api
+<span class="lv">[INFO]</span> [Auth] tokenSource=accounts accountCount=1 tokenCount=0</pre>
+                    </div>
+                </figure>
+            </div>
+
+            <div class="container">
+                <dl class="spec-strip">
+                    <div class="spec">
+                        <dt>形态</dt>
+                        <dd>单个 Python 文件（<code>sync.py</code>）</dd>
+                    </div>
+                    <div class="spec">
+                        <dt>依赖</dt>
+                        <dd>仅标准库，无数据库</dd>
+                    </div>
+                    <div class="spec">
+                        <dt>账户</dt>
+                        <dd>多账户，内置 <code>admin</code></dd>
+                    </div>
+                    <div class="spec">
+                        <dt>数据</dt>
+                        <dd><code>journal.log</code>，一行一条</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+
+        <!-- 01 特性 -->
+        <section class="section" id="features">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">01</span>特性</p>
+                    <h2 class="section-title">日志即数据</h2>
+                    <p class="section-desc">
+                        服务端只有一份操作日志：一行一条 JSON，追加写入。删除写成明确的删除标记，
+                        条目被彻底删除后连正文带历史一并抹掉，只留那一行。
+                    </p>
+                </header>
+
+                <div class="cell-grid reveal">
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-log"/></svg></div>
+                        <h3>操作日志即数据</h3>
+                        <p>每个账户一份 <code>journal.log</code>，一行一条 <code>put</code> / <code>del</code>。把日志从头重放一遍即为该账户的全部笔记与待办，不存在别的状态来源。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></div>
+                        <h3>删除即删除</h3>
+                        <p>删除是一条带全局序号的删除标记。重放只会删除，不会把别的设备上的老副本推回来，也不会把已删除的条目重新生成。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg></div>
+                        <h3>可复用 ID</h3>
+                        <p>条目彻底删除后，其 ID 进回收池供后续新建使用；被某台设备领走的 ID 会被占住 15 分钟，条目落盘即释放，两台设备同时新建不会撞号。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+                        <h3>幂等提交</h3>
+                        <p>每条操作带 <code>opId</code>。客户端断线重试、重复提交同一个 <code>opId</code> 不会重复写入日志，服务端返回它原来的序号。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg></div>
+                        <h3>令牌鉴权</h3>
+                        <p>每个账户一套访问令牌，服务端只保存 HMAC-SHA256 摘要，明文仅在创建或重置时显示一次，并可与设备 id 绑定。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></div>
+                        <h3>路径安全</h3>
+                        <p>只接受数据目录内的相对路径，绝对路径与含 <code>..</code> 的路径一律拒绝；每个凭据只能读写它所属账户的那一份日志。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg></div>
+                        <h3>多账户</h3>
+                        <p>服务端默认只有内置账户 <code>admin</code>，其余账户在面板中新建（名称 1~32 个字符、密码至少 8 位）；各账户的笔记与待办互不可见。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></div>
+                        <h3>管理后台</h3>
+                        <p><code>/admin</code> 下的一套静态页：账户、令牌、日志与密码。页面按请求读取后原样返回，改动页面无需改动或重启服务端。</p>
+                    </article>
+
+                    <article class="cell">
+                        <div class="cell-icon"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg></div>
+                        <h3>托管网页版客户端</h3>
+                        <p>启动时把 Web 仓库克隆到 <code>web/</code> 并在根路径托管网页版；根路径留给客户端，同步接口在 <code>/sync</code>。</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- 02 同步模型 -->
+        <section class="section" id="model">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">02</span>同步模型</p>
+                    <h2 class="section-title">删除即删除，日志即数据</h2>
+                    <p class="section-desc">
+                        同步以「操作」为单位追加到日志，客户端只记录「已应用到第几号」，
+                        同步过程即「拉取序号之后的操作并重放 + 推送本地改动」。
+                    </p>
+                </header>
+
+                <div class="table-wrap reveal">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>同步模型</th>
+                                <th>客户端可见信息</th>
+                                <th>删除的后果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>文件快照 + 目录对比</td>
+                                <td>远端存在 / 不存在某文件</td>
+                                <td>「删除」与「从未见过」不可区分，其他设备会把本地缺失视为待上传，从而重新生成该文件</td>
+                            </tr>
+                            <tr>
+                                <td>操作日志（本项目）</td>
+                                <td>逐条 put / del 操作及其全局序号</td>
+                                <td>删除是一条明确的删除标记，重放只会删除，不会反向产生写回</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="split spaced">
+                    <div class="reveal">
+                        <h3 class="sub-title">服务端做三件事</h3>
+                        <ol class="steps">
+                            <li class="step">
+                                <span class="step-index">1</span>
+                                <div>
+                                    <h4>受理</h4>
+                                    <p>逐条校验操作类型与路径，分配全局递增序号，以一行 JSON 追加写入并 <code>fsync</code>；同一 <code>opId</code> 重复提交直接返回原序号。</p>
+                                </div>
+                            </li>
+                            <li class="step">
+                                <span class="step-index">2</span>
+                                <div>
+                                    <h4>拉取</h4>
+                                    <p><code>GET /sync/ops?since=&amp;limit=</code> 按序号分页返回，响应带上 <code>latestSeq</code> 与 <code>hasMore</code>；客户端据此记录进度。</p>
+                                </div>
+                            </li>
+                            <li class="step">
+                                <span class="step-index">3</span>
+                                <div>
+                                    <h4>整理</h4>
+                                    <p>条目被彻底删除后抹掉其正文与历史，只留一行删除标记；其余操作的序号不动，各设备记的进度照旧有效。管理后台也可手动整理。</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <ul class="check-list reveal">
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-log"/></svg>
+                            <span><strong>一行一条</strong>：日志是 JSON Lines，追加写入；只有整理时才重写。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-refresh"/></svg>
+                            <span><strong>序号不重排</strong>：整理只抹内容，不动序号，因此不会让任何设备重新拉取或漏拉。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-key"/></svg>
+                            <span><strong>回收与占位</strong>：删除腾出的 ID 进回收池；被领走的占住 15 分钟，条目落盘即释放，超时自动回到池子。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-shield"/></svg>
+                            <span><strong>只发跟得上的</strong>：领取 ID 时带上自己的进度，只有序号已跟上的才发放；发起删除的那一台可以不等，本地早已删掉。</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03 数据与日志 -->
+        <section class="section" id="storage">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">03</span>数据与日志</p>
+                    <h2 class="section-title">数据目录即全部状态</h2>
+                    <p class="section-desc">
+                        账户表、各账户的日志与令牌都在 <code>--data</code> 指向的目录里。备份该目录即为一次完整备份。
+                    </p>
+                </header>
+
+                <div class="split">
+                    <div class="reveal">
+                        <h3 class="sub-title">目录结构</h3>
+                        <div class="code-block">
+                            <div class="code-head">
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-drive"/></svg>
+                                <span>data/</span>
+                            </div>
+                            <pre><span class="cmd">data/
+├── users.json</span>          <span class="cmt"># 账户表：名称、口令摘要、启用与管理员标记</span><span class="cmd">
+├── config.json</span>         <span class="cmt"># 可选：host 与 port</span><span class="cmd">
+└── users/
+    ├── admin/
+    │   ├── journal.log</span> <span class="cmt"># 该账户的全部数据，一行一条 put / del</span><span class="cmd">
+    │   ├── journal.id</span>  <span class="cmt"># 日志身份，客户端据此判断是否仍是同一份日志</span><span class="cmd">
+    │   └── tokens.json</span> <span class="cmt"># 该账户的访问令牌，只存摘要</span><span class="cmd">
+    └── alice/
+        └── journal.log</span></pre>
+                        </div>
+                    </div>
+
+                    <div class="reveal">
+                        <h3 class="sub-title">日志里的一行</h3>
+                        <div class="code-block">
+                            <div class="code-head">
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-log"/></svg>
+                                <span>users/&lt;账户 id&gt;/journal.log</span>
+                            </div>
+                            <pre>{"seq": 128, "opId": "5f0c…", "device": "台式机",
+ "time": 1789840300633, "op": "put",
+ "path": "notes/aB3dE5fG7h.md",
+ "data": "&lt;!--EsprinData … --&gt;\n正文…",
+ "encoding": "utf8", "hash": "sha256:…"}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notes reveal">
+                    <div class="note">
+                        <h3>日志身份</h3>
+                        <p>每个账户的日志目录下有一枚 <code>journal.id</code>，客户端据此判断「还是不是同一份日志」，避免把两份无关的数据接在一起。</p>
+                    </div>
+                    <div class="note">
+                        <h3>口令与令牌</h3>
+                        <p>账户口令以 PBKDF2-SHA256（20 万次迭代）保存，令牌只存 HMAC-SHA256 摘要，两者都不落明文。</p>
+                    </div>
+                    <div class="note">
+                        <h3>旧版布局迁移</h3>
+                        <p>旧版单账户布局（数据目录根下的 <code>admin.json</code> 与日志、令牌）在首次启动时自动并入内置账户，原文件归档为 <code>admin.json.migrated</code>。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04 接口 -->
+        <section class="section" id="api">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">04</span>接口</p>
+                    <h2 class="section-title">三个入口，一套凭据</h2>
+                    <p class="section-desc">
+                        根路径 <code>/</code> 留给网页版客户端，管理后台在 <code>/admin</code>（接口在 <code>/admin/api</code>），
+                        同步接口在 <code>/sync</code>。
+                    </p>
+                </header>
+
+                <div class="table-wrap reveal">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>接口</th>
+                                <th>凭据</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GET /sync/health</td>
+                                <td>不需要</td>
+                                <td>探活，用于区分「地址错」与「凭据错」；带凭据时额外报出该账户的日志身份与账户名</td>
+                            </tr>
+                            <tr>
+                                <td>GET /sync/ops?since=&amp;limit=</td>
+                                <td>需要</td>
+                                <td>取该序号之后的操作，默认 500 条、最多 2000 条；响应带 <code>latestSeq</code> 与 <code>hasMore</code></td>
+                            </tr>
+                            <tr>
+                                <td>POST /sync/ops</td>
+                                <td>需要</td>
+                                <td>提交一批操作，逐条返回受理结果与序号；重复的 <code>opId</code> 返回原序号</td>
+                            </tr>
+                            <tr>
+                                <td>GET /sync/state</td>
+                                <td>需要</td>
+                                <td>报出 <code>latestSeq</code>、操作总数、已删除条目数、回收池大小与日志身份</td>
+                            </tr>
+                            <tr>
+                                <td>GET /sync/file?path=</td>
+                                <td>需要</td>
+                                <td>取单个条目的当前内容：正文、编码、哈希与它所在的序号</td>
+                            </tr>
+                            <tr>
+                                <td>GET /sync/ids?limit=</td>
+                                <td>需要</td>
+                                <td>列出回收池中可复用的 ID，最近删除的排在前面</td>
+                            </tr>
+                            <tr>
+                                <td>POST /sync/ids/claim</td>
+                                <td>需要</td>
+                                <td>领用可复用 ID（<code>device</code> / <code>kind</code> / <code>count</code> / <code>since</code>）；序号没跟上的用 <code>pending</code> 报回</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <ul class="check-list spaced reveal">
+                    <li>
+                        <svg class="icon sm" aria-hidden="true"><use href="#i-shield"/></svg>
+                        <span><strong>凭据两种</strong>：客户端的访问令牌（<code>Authorization: Bearer</code>）或账户登录会话；<code>/sync/*</code> 未携带凭据一律返回 401。</span>
+                    </li>
+                    <li>
+                        <svg class="icon sm" aria-hidden="true"><use href="#i-server"/></svg>
+                        <span><strong>容量上限</strong>：单条操作的内容上限 8 MB，分页上限 2000 条；超出会逐条报错，不会中断整批。</span>
+                    </li>
+                    <li>
+                        <svg class="icon sm" aria-hidden="true"><use href="#i-log"/></svg>
+                        <span><strong>逐条回报</strong>：一批操作里合法的照常入日志，不合法的单独给出原因（未知操作类型 / 路径不合法 / 缺少内容 / 内容过大）。</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 05 管理后台 -->
+        <section class="section" id="admin">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">05</span>管理后台</p>
+                    <h2 class="section-title">账户、令牌与日志</h2>
+                    <p class="section-desc">
+                        启动后在浏览器中打开「服务器地址 + <code>/admin</code>」。管理页是仓库 <code>manager/</code> 下的静态文件，
+                        由服务端按请求读取后原样返回。
+                    </p>
+                </header>
+
+                <div class="split">
+                    <div class="reveal">
+                        <h3 class="sub-title">面板分节</h3>
+                        <div class="panel">
+                            <div class="panel-head">
+                                <svg class="icon sm" aria-hidden="true"><use href="#i-sliders"/></svg>
+                                <span>管理后台 /admin</span>
+                            </div>
+                            <div class="panel-body">
+                                <dl class="admin-list">
+                                    <div>
+                                        <dt>正在管理的账户</dt>
+                                        <dd>决定令牌与日志两节作用在哪个账户上；服务端可供多个账户使用，各自的笔记与待办互不可见。</dd>
+                                    </div>
+                                    <div>
+                                        <dt>账户</dt>
+                                        <dd>新建账户、启用与停用、管理员标记、改名与改密、删除（连同该账户的数据目录）。</dd>
+                                    </div>
+                                    <div>
+                                        <dt>新建令牌 / 已有令牌</dt>
+                                        <dd>名称与设备 id 可选；明文只在创建或重置的那一次显示，随时可复制。</dd>
+                                    </div>
+                                    <div>
+                                        <dt>数据与日志</dt>
+                                        <dd>日志概要（操作数、条目数、已删除数、回收池大小、体积与更新时间），可刷新、整理与下载。</dd>
+                                    </div>
+                                    <div>
+                                        <dt>账户密码</dt>
+                                        <dd>修改当前账户的密码，至少 8 位。</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <div class="panel-foot">
+                                <p class="demo-note">界面示意，按管理页的实际分节列出</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="check-list reveal">
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-key"/></svg>
+                            <span><strong>首次打开先设密码</strong>：全新部署的管理后台只有「设置管理密码」一页（至少 8 位），设完即以该账户进入。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-lock"/></svg>
+                            <span><strong>登录限流</strong>：同一来源 60 秒内连续失败 10 次即暂时拒绝；登录会话有效期 12 小时。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-folder"/></svg>
+                            <span><strong>内置账户不可动</strong>：<code>admin</code> 不可删除、不可停用、不可取消管理员，也不能改名（它的名字同时是数据目录名）。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-shield"/></svg>
+                            <span><strong>至少保留一个账户</strong>：删除到只剩一个时会被拒绝。</span>
+                        </li>
+                        <li>
+                            <svg class="icon sm" aria-hidden="true"><use href="#i-log"/></svg>
+                            <span><strong>下载即快照</strong>：下载得到的是当前账户那份 <code>journal.log</code> 的快照，这个账户的全部笔记与待办就在其中。</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 06 部署 -->
+        <section class="section" id="deploy">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">06</span>部署</p>
+                    <h2 class="section-title">一个文件，一条命令</h2>
+                    <p class="section-desc">
+                        在存放数据的机器上运行即可。默认只监听本机；要给局域网内的设备使用，
+                        把监听地址写成 <code>0.0.0.0</code> 并在防火墙上放行端口。
+                    </p>
+                </header>
+
+                <div class="code-block reveal">
+                    <div class="code-head">
+                        <svg class="icon xs" aria-hidden="true"><use href="#i-terminal"/></svg>
+                        <span>运行</span>
+                        <button class="btn btn-quiet sm push-right" type="button" data-copy="python sync.py --host 0.0.0.0 --port 8686 --data ./esprin-data">
+                            <svg class="icon xs" aria-hidden="true"><use href="#i-copy"/></svg>
+                            <span>复制</span>
+                        </button>
+                    </div>
+                    <pre><span class="cmt"># 默认：127.0.0.1:8686，数据目录 ./data</span>
+<span class="cmd">python sync.py</span>
+<span class="cmt"># 局域网共享，并指定数据目录</span>
+<span class="cmd">python sync.py --host 0.0.0.0 --port 8686 --data ./esprin-data</span>
+<span class="cmt"># 离线自测：覆盖接口、管理后台、账户、回收 ID、日志整理与旧版迁移，不监听端口</span>
+<span class="cmd">python sync.py --selftest</span></pre>
+                </div>
+
+                <div class="table-wrap spaced reveal">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>参数</th>
+                                <th>说明</th>
+                                <th>默认</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>--host</td>
+                                <td>监听地址</td>
+                                <td><code>127.0.0.1</code>，或 <code>config.json</code> 中的 <code>host</code></td>
+                            </tr>
+                            <tr>
+                                <td>--port</td>
+                                <td>监听端口</td>
+                                <td><code>8686</code>，或 <code>config.json</code> 中的 <code>port</code></td>
+                            </tr>
+                            <tr>
+                                <td>--data</td>
+                                <td>数据目录：账户表与各账户的日志、令牌都在这里</td>
+                                <td><code>./data</code></td>
+                            </tr>
+                            <tr>
+                                <td>--token</td>
+                                <td>访问令牌，等同内置账户的一份令牌；不传则凭据只来自管理后台</td>
+                                <td>环境变量 <code>ESPRIN_TOKEN</code></td>
+                            </tr>
+                            <tr>
+                                <td>--web-repo</td>
+                                <td>网页版客户端仓库，<code>web/</code> 里没有页面时从这里克隆</td>
+                                <td><code>https://github.com/EsprinProject/Web.git</code></td>
+                            </tr>
+                            <tr>
+                                <td>--web-ref</td>
+                                <td>克隆该仓库的哪个分支或标签</td>
+                                <td><code>main</code></td>
+                            </tr>
+                            <tr>
+                                <td>--web-update</td>
+                                <td>启动时对已有的克隆做一次 <code>git pull --ff-only</code></td>
+                                <td>关闭</td>
+                            </tr>
+                            <tr>
+                                <td>--no-web-clone</td>
+                                <td>不克隆网页版客户端，只用现有的 <code>web/</code> 目录</td>
+                                <td>关闭</td>
+                            </tr>
+                            <tr>
+                                <td>--selftest</td>
+                                <td>跑一遍内置自测后退出</td>
+                                <td>关闭</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notes reveal">
+                    <div class="note">
+                        <h3>配置文件</h3>
+                        <p>想让设置常驻而不改命令行，把 <code>host</code> 与 <code>port</code> 写进 <code>config.json</code>；查找顺序为数据目录、<code>sync.py</code> 所在目录、其下的 <code>data/</code>。命令行参数优先。</p>
+                    </div>
+                    <div class="note">
+                        <h3>常驻运行</h3>
+                        <p>仓库带有 <code>ecosystem.config.js</code>，用 pm2 起名为 <code>EsprinSync</code>、以 <code>python3</code> 解释执行并自动重启；也可交给系统的服务管理器。</p>
+                    </div>
+                    <div class="note">
+                        <h3>自测覆盖</h3>
+                        <p><code>--selftest</code> 顺次跑过配置、接口、网页版、管理后台、账户、强制鉴权、重载日志、回收 ID、整理日志、重载后台与旧版迁移各节，全部离线完成。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 07 接入 -->
+        <section class="section" id="clients">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">07</span>接入</p>
+                    <h2 class="section-title">客户端怎么连上来</h2>
+                    <p class="section-desc">
+                        桌面端与网页端共用同一套文件格式与同一份操作日志，同一批数据可在两端之间互相接管。
+                    </p>
+                </header>
+
+                <div class="start-grid">
+                    <article class="start-card reveal">
+                        <p class="start-index">01</p>
+                        <h3>桌面客户端</h3>
+                        <p class="start-desc">
+                            在「设置 → 数据与存储 → 自建同步」中填写服务器地址与设备名，令牌经 IPC 单向提交、不回传明文，也不写进配置文件。
+                        </p>
+                        <div class="start-actions">
+                            <a class="btn btn-primary" href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">下载客户端</a>
+                            <a class="btn btn-ghost" href="../Nemo/">Nemo 官网</a>
+                        </div>
+                    </article>
+
+                    <article class="start-card reveal">
+                        <p class="start-index">02</p>
+                        <h3>网页客户端</h3>
+                        <p class="start-desc">
+                            由本服务端在根路径托管：启动时把 Web 仓库克隆到 <code>web/</code>，打开服务器地址即为客户端，自动连接，必要时弹一次可关闭的登录卡片。
+                        </p>
+                        <div class="start-actions">
+                            <a class="btn btn-primary" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">打开网页版</a>
+                            <a class="btn btn-ghost" href="https://github.com/EsprinProject/Web#readme" target="_blank" rel="noopener">Web 说明</a>
+                        </div>
+                    </article>
+
+                    <article class="start-card reveal">
+                        <p class="start-index">03</p>
+                        <h3>日志导入与摊平</h3>
+                        <p class="start-desc">
+                            客户端能把这份日志导入本地数据目录（以此为准还原数据），或把它摊成一个与数据目录同构的文件夹，便于直接查看与接管。
+                        </p>
+                        <div class="start-actions">
+                            <a class="btn btn-primary" href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">服务端仓库</a>
+                            <a class="btn btn-ghost" href="#api">接口说明</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <div class="brand-row">
+                    <img src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Sync.png" width="22" height="22" alt="">
+                    <span class="brand-name">EsprinSync</span>
+                </div>
+                <p class="footer-tagline">Note, Nothing.</p>
+                <p class="footer-note">服务端的全部数据即一份操作日志。备份数据目录即为一次完整备份。</p>
+            </div>
+
+            <nav class="footer-col" aria-label="项目">
+                <h3>项目</h3>
+                <a href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">Sync 仓库</a>
+                <a href="https://github.com/EsprinProject/Sync/blob/main/sync.py" target="_blank" rel="noopener">sync.py</a>
+                <a href="https://github.com/EsprinProject/Sync/blob/main/config.json.example" target="_blank" rel="noopener">config.json.example</a>
+                <a href="https://github.com/EsprinProject/Sync/blob/main/ecosystem.config.js" target="_blank" rel="noopener">ecosystem.config.js</a>
+            </nav>
+
+            <nav class="footer-col" aria-label="生态">
+                <h3>生态</h3>
+                <a href="../">EsprinProject 官网</a>
+                <a href="../Nemo/">Nemo 官网</a>
+                <a href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">网页版</a>
+                <a href="https://github.com/EsprinProject/Web" target="_blank" rel="noopener">Web 仓库</a>
+            </nav>
+
+            <nav class="footer-col" aria-label="本页">
+                <h3>本页</h3>
+                <a href="#features">特性</a>
+                <a href="#model">同步模型</a>
+                <a href="#storage">数据与日志</a>
+                <a href="#api">接口</a>
+                <a href="#admin">管理后台</a>
+                <a href="#deploy">部署</a>
+                <a href="#clients">接入</a>
+            </nav>
+        </div>
+    </footer>
+
+    <button class="back-top" id="back-top" type="button" aria-label="回到顶部" hidden>
+        <svg class="icon sm" aria-hidden="true"><use href="#i-up"/></svg>
+    </button>
+
+    <div class="toast-box" id="toast-box" aria-live="polite"></div>
+
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -1,2 +1,680 @@
 <!DOCTYPE html>
-Hello World
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EsprinProject — 本地优先的笔记应用与配套服务</title>
+    <meta name="description" content="本地优先的笔记应用与配套服务：桌面客户端 EsprinNemo、自建同步服务端 EsprinSync 与网页客户端。无账号体系，无云端托管，数据是用户磁盘上的 Markdown 文件。">
+    <meta name="theme-color" content="#0b0f14">
+    <meta property="og:title" content="EsprinProject — Note, Nothing.">
+    <meta property="og:description" content="本地优先的笔记应用与配套服务。桌面客户端、自建同步服务端与网页客户端共用同一套数据格式。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://esprinproject.github.io/Page/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/EsprinProject/Logos/main/Esprin.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="https://raw.githubusercontent.com/EsprinProject/Logos/main/Esprin.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/EsprinProject/Logos/main/Esprin.png">
+    <link rel="stylesheet" href="./styles.css">
+    <noscript><style>.reveal { opacity: 1; transform: none; } .nav-toggle { display: none; }</style></noscript>
+    <script>
+        /* 首屏渲染前同步注入主题，与应用内 boot.js 的做法一致，避免闪屏 */
+        (function () {
+            var root = document.documentElement;
+
+            var stored = null;
+            try { stored = localStorage.getItem('en-site-theme'); } catch (e) { /* 隐私模式下忽略 */ }
+            var light = stored === 'light'
+                || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: light)').matches);
+            if (light) root.classList.add('light');
+        })();
+    </script>
+</head>
+<body>
+    <!-- 图标精灵：线宽与圆角对齐应用内 Material Symbols Rounded 的观感 -->
+    <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="11" rx="2"/><path d="M2 19h20"/></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.2 2.4 3.3 5.3 3.3 8.5S14.2 18.1 12 20.5c-2.2-2.4-3.3-5.3-3.3-8.5S9.8 5.9 12 3.5Z"/></symbol>
+        <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6.5" rx="2"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2"/><path d="M7 7.2h.01M7 16.7h.01"/></symbol>
+        <symbol id="i-log" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h11"/><circle cx="19.5" cy="17.5" r="1.3"/></symbol>
+        <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h5M13 16h7"/><circle cx="15" cy="8" r="2"/><circle cx="11" cy="16" r="2"/></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.2-2.8 7.6-7 9-4.2-1.4-7-4.8-7-9V6l7-2.5Z"/><path d="m9 12.2 2.2 2.2 4.3-4.4"/></symbol>
+        <symbol id="i-drive" viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2.5"/><path d="M3.5 12h17"/><path d="M7 15h.01M11 15h.01"/></symbol>
+        <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/></symbol>
+        <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7.5 9.5 3 2.5-3 2.5"/><path d="M13.5 15h3.5"/></symbol>
+        <symbol id="i-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v10"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 19h14"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13"/><path d="m13 6.5 5.5 5.5L13 17.5"/></symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 5.8A2.8 2.8 0 0 0 12.7 3H6.8A2.8 2.8 0 0 0 4 5.8v5.9"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+        <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m6.5 10.5 5.5-5.5 5.5 5.5"/></symbol>
+        <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></symbol>
+        <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></symbol>
+        <symbol id="i-auto" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8 20h8M12 16.5V20"/></symbol>
+    </svg>
+
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <!-- 顶栏：全站唯一的固定导航 -->
+    <header class="site-header" id="top">
+        <div class="container header-inner">
+            <a class="brand" href="#top">
+                <img src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Esprin.png" width="22" height="22" alt="">
+                <span class="brand-name">EsprinProject</span>
+            </a>
+
+            <nav class="site-nav" id="site-nav" aria-label="站点导航">
+                <a class="nav-link" href="./Nemo/" title="EsprinNemo 官网">Nemo</a>
+                <a class="nav-link" href="./Sync/" title="EsprinSync 官网">Sync</a>
+                <a class="nav-link" href="#products">组件</a>
+                <a class="nav-link" href="#architecture">组成</a>
+                <a class="nav-link" href="#design">设计</a>
+                <a class="nav-link" href="#start">上手</a>
+                <a class="nav-link" href="#repos">仓库</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="icon-btn" id="btn-theme" type="button" title="主题：跟随系统（点击切换）" aria-label="主题：跟随系统（点击切换）">
+                    <svg class="icon sm" aria-hidden="true"><use href="#i-auto" id="theme-icon-use"/></svg>
+                </button>
+                <a class="icon-btn" href="https://github.com/EsprinProject" title="GitHub 组织" aria-label="GitHub 组织" target="_blank" rel="noopener">
+                    <svg class="icon sm fill" aria-hidden="true"><use href="#i-github"/></svg>
+                </a>
+                <a class="btn btn-ghost sm hide-sm header-web" href="https://esprinnemo.pages.dev" title="网页版" aria-label="网页版" target="_blank" rel="noopener">
+                    <svg class="icon xs" aria-hidden="true"><use href="#i-globe"/></svg>
+                    <span>网页版</span>
+                </a>
+                <a class="btn btn-primary sm hide-sm" href="#start">
+                    <svg class="icon xs" aria-hidden="true"><use href="#i-download"/></svg>
+                    <span>下载</span>
+                </a>
+                <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="打开导航菜单">
+                    <svg class="icon sm" aria-hidden="true"><use href="#i-menu"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端导航：与顶栏共用同一批锚点 -->
+        <div class="mobile-nav" id="mobile-nav" hidden>
+            <nav class="container" aria-label="站点导航（移动端）">
+                <a class="nav-link" href="./Nemo/">Nemo 官网</a>
+                <a class="nav-link" href="./Sync/">Sync 官网</a>
+                <a class="nav-link" href="#products">01 组件</a>
+                <a class="nav-link" href="#architecture">02 组成</a>
+                <a class="nav-link" href="#design">03 设计</a>
+                <a class="nav-link" href="#start">04 上手</a>
+                <a class="nav-link" href="#repos">05 仓库</a>
+                <a class="nav-link" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">网页版</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- 首屏：左文案 / 右真机截图，下方为规格条 -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <p class="eyebrow">本地优先 · 无账号体系 · 无云端托管</p>
+                    <h1 class="wordmark">EsprinProject</h1>
+                    <p class="tagline">Note, Nothing.</p>
+
+                    <p class="hero-lead">
+                        本地优先的笔记应用与配套服务。笔记与待办以 <code>.md</code> 落在数据目录，
+                        可由任意编辑器直接打开，整个数据目录复制一份即为一次完整备份。
+                    </p>
+                    <p class="hero-sub">
+                        除手动配置的自建同步与 AI 助手，以及可在设置中关闭的更新检查外，客户端不发起任何网络请求。
+                        桌面端与网页端共用同一套文件格式，读写同一份操作日志。
+                    </p>
+
+                    <div class="hero-actions">
+                        <a class="btn btn-primary lg" href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">
+                            <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+                            <span>下载桌面客户端</span>
+                        </a>
+                        <a class="btn btn-ghost lg" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">
+                            <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
+                            <span>打开网页版</span>
+                        </a>
+                        <a class="btn btn-ghost lg" href="https://github.com/EsprinProject" target="_blank" rel="noopener">
+                            <svg class="icon fill" aria-hidden="true"><use href="#i-github"/></svg>
+                            <span>浏览组织仓库</span>
+                        </a>
+                    </div>
+                    <p class="hero-note">各仓库以 GNU GPL v3.0 授权 · 无遥测 · 无账号体系</p>
+                </div>
+
+                <figure class="frame hero-frame">
+                    <div class="frame-bar">
+                        <span class="frame-dot" aria-hidden="true"></span>
+                        <span class="frame-title">EsprinNemo 主界面 · 侧边栏 / 笔记列表 / 编辑器 / AI 面板</span>
+                    </div>
+                    <button class="frame-body" type="button" data-shot="https://raw.githubusercontent.com/EsprinProject/Nemo/main/readme/screenshot-3.0.1.png" data-caption="EsprinNemo 主界面 · 侧边栏 / 笔记列表 / Markdown 编辑器 / AI 助手面板" aria-label="放大查看主界面截图">
+                        <img src="https://raw.githubusercontent.com/EsprinProject/Nemo/main/readme/screenshot-3.0.1.png" width="1200" height="800" decoding="async"
+                             alt="EsprinNemo 主界面：左侧边栏、笔记列表、Markdown 编辑器与右侧 AI 助手面板">
+                    </button>
+                </figure>
+            </div>
+
+            <div class="container">
+                <dl class="spec-strip">
+                    <div class="spec">
+                        <dt>组件</dt>
+                        <dd>桌面端 · 网页端 · 服务端</dd>
+                    </div>
+                    <div class="spec">
+                        <dt>存储</dt>
+                        <dd>纯 Markdown（<code>.md</code>）</dd>
+                    </div>
+                    <div class="spec">
+                        <dt>账号</dt>
+                        <dd>无账号体系</dd>
+                    </div>
+                    <div class="spec">
+                        <dt>许可</dt>
+                        <dd>GNU GPL v3.0</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+
+        <!-- 01 组件：三个仓库各自独立，共用同一套数据格式 -->
+        <section class="section" id="products">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">01</span>组件</p>
+                    <h2 class="section-title">一个数据目录，三种打开方式</h2>
+                    <p class="section-desc">
+                        桌面客户端、网页客户端与服务端各自独立成库，共用同一套数据格式：文件开头是内嵌元数据注释
+                        （标题、文件夹、标签、置顶、废纸篓、时间戳），其后为 Markdown 正文。
+                    </p>
+                </header>
+
+                <div class="product-grid">
+                    <article class="product reveal">
+                        <div class="product-head">
+                            <img class="product-logo" src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Nemo.png" width="36" height="36" alt="">
+                            <div>
+                                <h3>EsprinNemo</h3>
+                                <p class="product-kind">桌面客户端</p>
+                            </div>
+                        </div>
+                        <p class="product-desc">
+                            笔记、待办、随口记（Windows 本机语音识别）、小本本、AI 助手、自建同步客户端与自动更新。
+                        </p>
+                        <dl class="facts">
+                            <div><dt>形态</dt><dd>Electron + 原生 HTML / CSS / JavaScript</dd></div>
+                            <div><dt>产物</dt><dd>Windows 向导式安装包与便携版</dd></div>
+                            <div><dt>平台</dt><dd>Windows 10 / 11</dd></div>
+                        </dl>
+                        <div class="product-links">
+                            <a class="btn btn-primary sm" href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-download"/></svg>
+                                <span>下载</span>
+                            </a>
+                            <a class="btn btn-ghost sm" href="./Nemo/">
+                                <span>Nemo 官网</span>
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-arrow"/></svg>
+                            </a>
+                            <a class="btn btn-ghost sm" href="https://github.com/EsprinProject/Nemo" target="_blank" rel="noopener">源码</a>
+                        </div>
+                    </article>
+
+                    <article class="product reveal">
+                        <div class="product-head">
+                            <img class="product-logo" src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Sync.png" width="36" height="36" alt="">
+                            <div>
+                                <h3>EsprinSync</h3>
+                                <p class="product-kind">同步服务端</p>
+                            </div>
+                        </div>
+                        <p class="product-desc">
+                            多账户、操作日志、可复用 ID、令牌鉴权与管理后台，并托管网页版客户端。
+                        </p>
+                        <dl class="facts">
+                            <div><dt>形态</dt><dd>单个 Python 文件，仅使用标准库</dd></div>
+                            <div><dt>数据</dt><dd>每个账户一份 <code>journal.log</code></dd></div>
+                            <div><dt>后台</dt><dd>服务器地址 + <code>/admin</code></dd></div>
+                        </dl>
+                        <div class="product-links">
+                            <a class="btn btn-primary sm" href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">源码</a>
+                            <a class="btn btn-ghost sm" href="./Sync/">
+                                <span>Sync 官网</span>
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-arrow"/></svg>
+                            </a>
+                            <a class="btn btn-ghost sm" href="#start">部署步骤</a>
+                        </div>
+                    </article>
+
+                    <article class="product reveal">
+                        <div class="product-head">
+                            <img class="product-logo" src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Web.png" width="36" height="36" alt="">
+                            <div>
+                                <h3>EsprinNemoWeb</h3>
+                                <p class="product-kind">网页客户端</p>
+                            </div>
+                        </div>
+                        <p class="product-desc">
+                            界面与桌面版的现代布局逐条对应，含 AI 助手与秘密本；可直接在浏览器中使用，也可由自建服务端在根路径托管，可安装为 PWA。
+                        </p>
+                        <dl class="facts">
+                            <div><dt>形态</dt><dd>原生 HTML / CSS / JavaScript，无构建步骤</dd></div>
+                            <div><dt>地址</dt><dd><a href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">esprinnemo.pages.dev</a></dd></div>
+                            <div><dt>离线</dt><dd>Service Worker 缓存界面外壳</dd></div>
+                        </dl>
+                        <div class="product-links">
+                            <a class="btn btn-primary sm" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">打开网页版</a>
+                            <a class="btn btn-ghost sm" href="https://github.com/EsprinProject/Web" target="_blank" rel="noopener">源码</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- 02 组成：数据流向与两个客户端的关系 -->
+        <section class="section" id="architecture">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">02</span>组成</p>
+                    <h2 class="section-title">服务端只存操作日志</h2>
+                    <p class="section-desc">
+                        数据以「操作日志」形式保存在自建服务端目录，把日志从头重放一遍即为全部数据。
+                        服务端不保存任何以服务端为准的笔记副本。
+                    </p>
+                </header>
+
+                <div class="diagram reveal">
+                    <div class="diagram-col">
+                        <p class="diagram-label">客户端</p>
+                        <article class="node">
+                            <span class="node-icon"><svg class="icon sm" aria-hidden="true"><use href="#i-monitor"/></svg></span>
+                            <div>
+                                <h4>EsprinNemo</h4>
+                                <p>桌面客户端，Windows 安装版与便携版</p>
+                            </div>
+                        </article>
+                        <article class="node">
+                            <span class="node-icon"><svg class="icon sm" aria-hidden="true"><use href="#i-globe"/></svg></span>
+                            <div>
+                                <h4>EsprinNemoWeb</h4>
+                                <p>网页客户端，浏览器内运行，可安装为 PWA</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="diagram-link">
+                        <span class="link-label">操作日志 <code>/sync</code></span>
+                        <span class="link-rail" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="diagram-col">
+                        <p class="diagram-label">服务端</p>
+                        <article class="node node-primary">
+                            <span class="node-icon"><svg class="icon sm" aria-hidden="true"><use href="#i-server"/></svg></span>
+                            <div>
+                                <h4>EsprinSync</h4>
+                                <p>单个 Python 文件，仅使用标准库；支持多个账户</p>
+                            </div>
+                        </article>
+                        <article class="node">
+                            <span class="node-icon"><svg class="icon sm" aria-hidden="true"><use href="#i-shield"/></svg></span>
+                            <div>
+                                <h4>令牌鉴权</h4>
+                                <p>每份凭据只读写所属账户的那一份日志</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="diagram-link">
+                        <span class="link-label">追加写入</span>
+                        <span class="link-rail" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="diagram-col">
+                        <p class="diagram-label">数据与后台</p>
+                        <article class="node">
+                            <span class="node-icon"><svg class="icon sm" aria-hidden="true"><use href="#i-log"/></svg></span>
+                            <div>
+                                <h4>users/&lt;账户 id&gt;/journal.log</h4>
+                                <p>一行一条 put / del，重放即全部数据</p>
+                            </div>
+                        </article>
+                        <article class="node">
+                            <span class="node-icon"><svg class="icon sm" aria-hidden="true"><use href="#i-sliders"/></svg></span>
+                            <div>
+                                <h4>管理后台 <code>/admin</code></h4>
+                                <p>账户、令牌与日志整理</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="notes reveal">
+                    <div class="note">
+                        <h3>同一套文件格式</h3>
+                        <p>单篇文件自带全部信息，不依赖索引文件：标题、文件夹、标签、置顶、废纸篓与时间戳都写在文件开头，其后为 Markdown 正文。</p>
+                    </div>
+                    <div class="note">
+                        <h3>同一份操作日志</h3>
+                        <p>桌面端与网页端读写的是同一份服务端日志，同一批数据可在两端之间互相接管。</p>
+                    </div>
+                    <div class="note">
+                        <h3>一台进程两种角色</h3>
+                        <p>服务端启动时把 Web 仓库克隆到 <code>web/</code> 并在根路径托管网页版；根路径留给客户端，管理后台另挂在 <code>/admin</code>。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03 设计：两个核心设计 -->
+        <section class="section" id="design">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">03</span>设计</p>
+                    <h2 class="section-title">两个核心设计</h2>
+                    <p class="section-desc">
+                        本地优先决定了数据放在哪里，操作日志决定了同步如何表达删除。两者共同决定了这套实现与
+                        「文件快照 + 目录对比」类同步的差别。
+                    </p>
+                </header>
+
+                <div class="design-grid">
+                    <article class="design reveal">
+                        <div class="design-icon"><svg class="icon" aria-hidden="true"><use href="#i-drive"/></svg></div>
+                        <h3>本地优先</h3>
+                        <p>数据目录即全部状态。不存在账号，不存在服务端侧的笔记副本，也不存在以服务端为准的隐式上传。</p>
+                        <ul class="bullets">
+                            <li>笔记与待办以 <code>.md</code> 落在 <code>notes/</code> 与 <code>todos/</code>，AI 对话以一份对话一个 JSON 文件落在 <code>ai_chats/</code>。</li>
+                            <li>密钥类内容（AI Key、同步令牌）不进数据目录，交由系统密钥链单独保管，备份、迁移或分享数据目录都不会带出密钥。</li>
+                            <li>复制整个数据目录即完成一次备份，用 Git 初始化即获得完整历史版本。</li>
+                        </ul>
+                    </article>
+
+                    <article class="design reveal">
+                        <div class="design-icon"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg></div>
+                        <h3>操作日志同步</h3>
+                        <p>同步以「操作（put / del）」为单位追加到服务端日志，客户端只记录「已应用到第几号」。</p>
+                        <ul class="bullets">
+                            <li>同步过程为「拉取序号之后的操作并重放 + 推送本地改动」，删除是一条明确的删除标记，重放只会删除，不会反向产生写回。</li>
+                            <li>条目被彻底删除后，服务端抹掉其正文与历史，只留一行删除标记，并把它作为可复用 ID 收进回收池供后续新建使用。</li>
+                            <li>其余操作的序号不动，各设备记的「已应用到第几号」因此照旧有效。</li>
+                        </ul>
+                    </article>
+                </div>
+
+                <div class="table-wrap spaced reveal">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>同步模型</th>
+                                <th>客户端可见信息</th>
+                                <th>删除的后果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>文件快照 + 目录对比</td>
+                                <td>远端存在 / 不存在某文件</td>
+                                <td>「删除」与「从未见过」不可区分，其他设备会把本地缺失视为待上传，从而重新生成该文件</td>
+                            </tr>
+                            <tr>
+                                <td>操作日志（本项目）</td>
+                                <td>逐条 put / del 操作及其全局序号</td>
+                                <td>删除是一条明确的删除标记，重放只会删除，不会反向产生写回</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04 上手：三条路径 -->
+        <section class="section" id="start">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">04</span>上手</p>
+                    <h2 class="section-title">三条路径</h2>
+                    <p class="section-desc">
+                        三条路径互不依赖：只用桌面客户端即可离线写作；需要多设备同步时再部署服务端；
+                        网页客户端由服务端托管，也可以在无服务端时以本地模式打开。
+                    </p>
+                </header>
+
+                <div class="start-grid">
+                    <article class="start-card reveal">
+                        <p class="start-index">01</p>
+                        <h3>安装桌面客户端</h3>
+                        <p class="start-desc">向导式安装包与便携版均在 GitHub Releases 发布，两者都不需要账号，安装完成后即可离线使用。</p>
+                        <p class="release-line">
+                            <span class="release-tag" id="release-tag">最新版本</span>
+                            <span class="release-note" id="release-note">以发布页为准</span>
+                        </p>
+                        <div class="start-actions">
+                            <a class="btn btn-primary" href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-download"/></svg>
+                                <span>下载</span>
+                            </a>
+                            <a class="btn btn-ghost" href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">全部版本</a>
+                        </div>
+                    </article>
+
+                    <article class="start-card reveal">
+                        <p class="start-index">02</p>
+                        <h3>部署同步服务端</h3>
+                        <p class="start-desc">在存放数据的机器上运行即可，除 Python 3 标准库外没有依赖；启动后由它托管网页版客户端。</p>
+                        <div class="code-block">
+                            <div class="code-head">
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-terminal"/></svg>
+                                <span>sync.py</span>
+                                <button class="btn btn-quiet sm push-right" type="button" data-copy="git clone https://github.com/esprinproject/sync&#10;cd sync&#10;python sync.py">
+                                    <svg class="icon xs" aria-hidden="true"><use href="#i-copy"/></svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><span class="cmd">git clone https://github.com/esprinproject/sync</span>
+<span class="cmd">cd sync</span>
+<span class="cmd">python sync.py</span></pre>
+                        </div>
+                        <div class="start-actions">
+                            <a class="btn btn-primary" href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">服务端仓库</a>
+                            <a class="btn btn-ghost" href="https://github.com/EsprinProject/Sync#readme" target="_blank" rel="noopener">说明</a>
+                        </div>
+                    </article>
+
+                    <article class="start-card reveal">
+                        <p class="start-index">03</p>
+                        <h3>使用网页客户端</h3>
+                        <p class="start-desc">
+                            已部署在 <a href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">esprinnemo.pages.dev</a>，无需安装；
+                            该地址不接服务端，以本地模式运行（界面与本地副本照常，同步整套不出现）。需要跨设备同步时，由自建服务端在根路径托管同一份界面。
+                        </p>
+                        <div class="code-block">
+                            <div class="code-head">
+                                <svg class="icon xs" aria-hidden="true"><use href="#i-terminal"/></svg>
+                                <span>静态服务器</span>
+                                <button class="btn btn-quiet sm push-right" type="button" data-copy="python -m http.server 8686">
+                                    <svg class="icon xs" aria-hidden="true"><use href="#i-copy"/></svg>
+                                    <span>复制</span>
+                                </button>
+                            </div>
+                            <pre><span class="cmt"># 或 npx serve -l 8686</span>
+<span class="cmd">python -m http.server 8686</span></pre>
+                        </div>
+                        <div class="start-actions">
+                            <a class="btn btn-primary" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">打开网页版</a>
+                            <a class="btn btn-ghost" href="https://github.com/EsprinProject/Web#readme" target="_blank" rel="noopener">说明</a>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="table-wrap spaced reveal">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>目标</th>
+                                <th>入口</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>了解 Nemo 功能与界面</td>
+                                <td><a href="./Nemo/">本站 Nemo 页</a>，或 <a href="https://github.com/EsprinProject/Nemo#readme" target="_blank" rel="noopener">Nemo 使用文档</a></td>
+                            </tr>
+                            <tr>
+                                <td>从源码运行 Nemo</td>
+                                <td><code>bun install</code>、<code>bun start</code>、<code>bun run build</code>；环境要求 Node.js 与 bun</td>
+                            </tr>
+                            <tr>
+                                <td>在浏览器直接打开网页版</td>
+                                <td>直接访问 <a href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">esprinnemo.pages.dev</a>；也可双击 Web 仓库的 <code>index.html</code>，或对其起一台静态服务器</td>
+                            </tr>
+                            <tr>
+                                <td>自建同步服务端</td>
+                                <td><a href="./Sync/">Sync 官网</a>给出运行、接口与管理后台说明；<a href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">Sync 仓库</a>为源码与发布</td>
+                            </tr>
+                            <tr>
+                                <td>取用品牌资源</td>
+                                <td><a href="https://github.com/EsprinProject/Logos" target="_blank" rel="noopener">Logos 仓库</a>中各仓库使用的图标源图</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 05 仓库 -->
+        <section class="section" id="repos">
+            <div class="container">
+                <header class="section-head reveal">
+                    <p class="eyebrow"><span class="eyebrow-index">05</span>仓库</p>
+                    <h2 class="section-title">组织仓库一览</h2>
+                    <p class="section-desc">
+                        每个仓库各自独立授权与发布，官网本身也是一个独立仓库。
+                    </p>
+                </header>
+
+                <div class="table-wrap reveal">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>仓库</th>
+                                <th>内容</th>
+                                <th>形态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="https://github.com/EsprinProject/Nemo" target="_blank" rel="noopener">Nemo</a></td>
+                                <td>桌面客户端：笔记、待办、随口记（系统本机语音识别）、小本本、AI 助手、自建同步客户端、自动更新</td>
+                                <td>Electron + 原生 HTML / CSS / JavaScript；产出 Windows 安装包与便携版</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">Sync</a></td>
+                                <td>自建同步服务端：多账户、操作日志、可复用 ID、令牌鉴权、管理后台，并托管网页版客户端</td>
+                                <td>单个 Python 文件（仅标准库）加管理页静态文件</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EsprinProject/Web" target="_blank" rel="noopener">Web</a></td>
+                                <td>网页客户端：界面与桌面版现代布局逐条对应，可安装为 PWA</td>
+                                <td>原生 HTML / CSS / JavaScript，无构建步骤</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EsprinProject/Page" target="_blank" rel="noopener">Page</a></td>
+                                <td>官网：功能说明、界面截图与最新版本下载入口</td>
+                                <td>GitHub Pages 静态站点</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EsprinProject/Logos" target="_blank" rel="noopener">Logos</a></td>
+                                <td>品牌资源：各仓库使用的图标源图</td>
+                                <td>PNG</td>
+                            </tr>
+                            <tr>
+                                <td><a href="https://github.com/EsprinProject/.github" target="_blank" rel="noopener">.github</a></td>
+                                <td>组织配置与组织主页</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notes reveal">
+                    <div class="note">
+                        <h3>许可</h3>
+                        <p>各仓库均以 GNU General Public License v3.0 授权，授权全文见对应仓库的 <code>LICENSE</code>。</p>
+                    </div>
+                    <div class="note">
+                        <h3>第三方资源</h3>
+                        <p>仓库内随应用分发的资源各自沿用原授权：Material Symbols 为 Apache-2.0，品牌字体 Mohave 遵循 SIL Open Font License。</p>
+                    </div>
+                    <div class="note">
+                        <h3>反馈</h3>
+                        <p>缺陷与需求提交至对应仓库的 Issues；服务端与网页版的问题归各自仓库。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <div class="brand-row">
+                    <img src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Esprin.png" width="22" height="22" alt="">
+                    <span class="brand-name">EsprinProject</span>
+                </div>
+                <p class="footer-tagline">Note, Nothing.</p>
+                <p class="footer-note">本地优先的笔记应用与配套服务。无账号体系，无云端托管，无遥测。</p>
+            </div>
+
+            <nav class="footer-col" aria-label="仓库">
+                <h3>仓库</h3>
+                <a href="https://github.com/EsprinProject/Nemo" target="_blank" rel="noopener">Nemo</a>
+                <a href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">Sync</a>
+                <a href="./Sync/">Sync 官网</a>
+                <a href="https://github.com/EsprinProject/Web" target="_blank" rel="noopener">Web</a>
+                <a href="https://github.com/EsprinProject/Page" target="_blank" rel="noopener">Page</a>
+                <a href="https://github.com/EsprinProject/Logos" target="_blank" rel="noopener">Logos</a>
+            </nav>
+
+            <nav class="footer-col" aria-label="资源">
+                <h3>资源</h3>
+                <a href="./Nemo/">Nemo 官网</a>
+                <a href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">网页版</a>
+                <a href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">版本发布</a>
+                <a href="https://github.com/EsprinProject/Nemo#readme" target="_blank" rel="noopener">Nemo 使用文档</a>
+                <a href="https://github.com/EsprinProject/Web#readme" target="_blank" rel="noopener">Web 说明</a>
+                <a href="https://github.com/EsprinProject/Sync#readme" target="_blank" rel="noopener">Sync 说明</a>
+            </nav>
+
+            <nav class="footer-col" aria-label="本页">
+                <h3>本页</h3>
+                <a href="#products">组件</a>
+                <a href="#architecture">组成</a>
+                <a href="#design">设计</a>
+                <a href="#start">上手</a>
+                <a href="#repos">仓库</a>
+            </nav>
+        </div>
+    </footer>
+
+    <button class="back-top" id="back-top" type="button" aria-label="回到顶部" hidden>
+        <svg class="icon sm" aria-hidden="true"><use href="#i-up"/></svg>
+    </button>
+
+    <!-- 截图预览：所有 .frame-body 复用同一份遮罩 -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="截图预览" hidden>
+        <button class="lightbox-close" id="lightbox-close" type="button" aria-label="关闭预览">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+        <figure class="lightbox-body">
+            <img id="lightbox-img" src="" alt="">
+            <figcaption id="lightbox-caption"></figcaption>
+        </figure>
+    </div>
+
+    <div class="toast-box" id="toast-box" aria-live="polite"></div>
+
+    <script src="./script.js"></script>
+</body>
+</html>

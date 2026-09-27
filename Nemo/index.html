@@ -72,6 +72,7 @@
         <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="10.5" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/><path d="M9 21h6"/></symbol>
         <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 4v7"/><path d="M7.2 6.8a7 7 0 1 0 9.6 0"/></symbol>
         <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m6.5 10.5 5.5-5.5 5.5 5.5"/></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.2 2.4 3.3 5.3 3.3 8.5S14.2 18.1 12 20.5c-2.2-2.4-3.3-5.3-3.3-8.5S9.8 5.9 12 3.5Z"/></symbol>
     </svg>
 
     <a class="skip-link" href="#main">跳到主要内容</a>
@@ -85,6 +86,7 @@
             </a>
 
             <nav class="site-nav" id="site-nav" aria-label="站点导航">
+                <a class="nav-link" href="../" title="EsprinProject 官网">EsprinProject</a>
                 <a class="nav-link" href="#interface">界面</a>
                 <a class="nav-link" href="#features">功能</a>
                 <a class="nav-link" href="#voice">随口记</a>
@@ -101,6 +103,10 @@
                 <a class="icon-btn" id="link-github" href="https://github.com/EsprinProject/Nemo" title="GitHub 仓库" aria-label="GitHub 仓库" target="_blank" rel="noopener">
                     <svg class="icon sm fill" aria-hidden="true"><use href="#i-github"/></svg>
                 </a>
+                <a class="btn btn-ghost sm hide-sm header-web" href="https://esprinnemo.pages.dev" title="网页版" aria-label="网页版" target="_blank" rel="noopener">
+                    <svg class="icon xs" aria-hidden="true"><use href="#i-globe"/></svg>
+                    <span>网页版</span>
+                </a>
                 <a class="btn btn-primary sm hide-sm" href="#download">
                     <svg class="icon xs" aria-hidden="true"><use href="#i-download"/></svg>
                     <span>下载</span>
@@ -114,6 +120,7 @@
         <!-- 移动端导航：与顶栏共用同一批锚点 -->
         <div class="mobile-nav" id="mobile-nav" hidden>
             <nav class="container" aria-label="站点导航（移动端）">
+                <a class="nav-link" href="../">EsprinProject</a>
                 <a class="nav-link" href="#interface">01 界面</a>
                 <a class="nav-link" href="#features">02 功能</a>
                 <a class="nav-link" href="#voice">03 随口记</a>
@@ -122,6 +129,7 @@
                 <a class="nav-link" href="#sync">06 自建同步</a>
                 <a class="nav-link" href="#shortcuts">07 快捷键</a>
                 <a class="nav-link" href="#download">08 下载</a>
+                <a class="nav-link" href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">网页版</a>
             </nav>
         </div>
     </header>
@@ -802,7 +810,15 @@
                 <a href="https://github.com/EsprinProject/Nemo" target="_blank" rel="noopener">Nemo 仓库</a>
                 <a href="https://github.com/EsprinProject/Nemo/releases" target="_blank" rel="noopener">版本发布</a>
                 <a href="https://github.com/EsprinProject/Nemo#readme" target="_blank" rel="noopener">使用文档</a>
-                <a href="https://github.com/EsprinProject/Sync" target="_blank" rel="noopener">Sync 服务端</a>
+                <a href="#download">下载</a>
+            </nav>
+
+            <nav class="footer-col" aria-label="生态">
+                <h3>生态</h3>
+                <a href="../">EsprinProject 官网</a>
+                <a href="../Sync/">Sync 服务端</a>
+                <a href="https://esprinnemo.pages.dev" target="_blank" rel="noopener">网页版</a>
+                <a href="https://github.com/EsprinProject/Web" target="_blank" rel="noopener">Web 仓库</a>
             </nav>
 
             <nav class="footer-col" aria-label="本页">
@@ -811,6 +827,8 @@
                 <a href="#features">功能</a>
                 <a href="#voice">随口记</a>
                 <a href="#ai">AI 助手</a>
+                <a href="#privacy">数据与隐私</a>
+                <a href="#sync">自建同步</a>
                 <a href="#shortcuts">快捷键</a>
             </nav>
         </div>

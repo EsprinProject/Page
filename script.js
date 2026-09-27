@@ -1,4 +1,4 @@
-/* EsprinNemo 官网交互
+/* EsprinProject 官网交互
    仅维护页面自身状态：主题、顶栏与移动端导航、截图预览、版本号。 */
 
 (function () {
@@ -42,6 +42,13 @@
 
     var theme = readTheme();
 
+    function syncThemeColorMeta() {
+        var metaColor = document.querySelector('meta[name="theme-color"]');
+        if (!metaColor) return;
+        var bg = getComputedStyle(root).getPropertyValue('--bg-body').trim();
+        if (bg) metaColor.setAttribute('content', bg);
+    }
+
     function renderTheme() {
         var isLight = theme === 'light' || (theme === 'system' && systemPrefersLight());
         root.classList.toggle('light', isLight);
@@ -58,13 +65,6 @@
             button.setAttribute('aria-label', button.title);
         }
         syncThemeColorMeta();
-    }
-
-    function syncThemeColorMeta() {
-        var metaColor = document.querySelector('meta[name="theme-color"]');
-        if (!metaColor) return;
-        var bg = getComputedStyle(root).getPropertyValue('--bg-body').trim();
-        if (bg) metaColor.setAttribute('content', bg);
     }
 
     function setupTheme() {
@@ -188,7 +188,7 @@
     }
 
     function setupNavHighlight() {
-        // 导航内混有指向母站与网页版的整页链接，只有页内锚点参与高亮
+        // 导航内混有指向子站的整页链接，只有页内锚点参与高亮
         var links = Array.prototype.slice.call(document.querySelectorAll('#site-nav .nav-link'))
             .filter(function (link) {
                 var href = link.getAttribute('href') || '';
@@ -303,7 +303,7 @@
     }
 
     /* --------------------------------------------------------------
-       版本号：读发布页的最新 tag，取不到时保留页面中的静态版本
+       版本号：读发布页的最新 tag，取不到时保留页面中的静态文案
        -------------------------------------------------------------- */
     function formatDate(value) {
         var date = new Date(value);
@@ -329,7 +329,7 @@
                 note.textContent = date ? '发布于 ' + date : '最新发布';
             })
             .catch(function () {
-                note.textContent = '版本号以发布页为准';
+                note.textContent = '以发布页为准';
             });
     }
 
