@@ -15,12 +15,12 @@
     <link rel="stylesheet" href="./styles.css">
     <noscript><style>.reveal { opacity: 1; transform: none; } .nav-toggle { display: none; }</style></noscript>
     <script>
-        /* 首屏渲染前同步注入主题，与应用内 boot.js 的做法一致，避免闪屏 */
+
         (function () {
             var root = document.documentElement;
 
             var stored = null;
-            try { stored = localStorage.getItem('en-site-theme'); } catch (e) { /* 隐私模式下忽略 */ }
+            try { stored = localStorage.getItem('en-site-theme'); } catch (e) {  }
             var light = stored === 'light'
                 || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: light)').matches);
             if (light) root.classList.add('light');
@@ -28,7 +28,7 @@
     </script>
 </head>
 <body>
-    <!-- 图标精灵：线宽与圆角对齐应用内 Material Symbols Rounded 的观感 -->
+
     <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
         <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h4"/><path d="M8 13h8M8 17h5"/></symbol>
         <symbol id="i-todo" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></symbol>
@@ -78,8 +78,7 @@
 
     <a class="skip-link" href="#main">跳到主要内容</a>
 
-    <!-- 顶栏：全站唯一的固定导航 -->
-    <header class="site-header" id="top">
+<header class="site-header" id="top">
         <div class="container header-inner">
             <a class="brand" href="#top">
                 <img src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Main.new.svg" width="22" height="22" alt="">
@@ -118,8 +117,7 @@
             </div>
         </div>
 
-        <!-- 移动端导航：与顶栏共用同一批锚点 -->
-        <div class="mobile-nav" id="mobile-nav" hidden>
+<div class="mobile-nav" id="mobile-nav" hidden>
             <nav class="container" aria-label="站点导航（移动端）">
                 <a class="nav-link" href="../">EsprinProject</a>
                 <a class="nav-link" href="#interface">01 界面</a>
@@ -136,7 +134,7 @@
     </header>
 
     <main id="main">
-        <!-- 首屏：左文案 / 右真机截图，下方为规格条 -->
+
         <section class="hero">
             <div class="container hero-grid">
                 <div class="hero-copy">
@@ -200,8 +198,7 @@
             </div>
         </section>
 
-        <!-- 01 界面：全部使用应用真实截图 -->
-        <section class="section" id="interface">
+<section class="section" id="interface">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">01</span>界面</p>
@@ -267,8 +264,7 @@
             </div>
         </section>
 
-        <!-- 02 功能特性 -->
-        <section class="section" id="features">
+<section class="section" id="features">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">02</span>功能特性</p>
@@ -354,8 +350,7 @@
             </div>
         </section>
 
-        <!-- 03 随口记：Windows 本机语音识别 -->
-        <section class="section" id="voice">
+<section class="section" id="voice">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">03</span>随口记</p>
@@ -414,8 +409,7 @@
             </div>
         </section>
 
-        <!-- 04 AI 助手：可选，不配置不联网 -->
-        <section class="section" id="ai">
+<section class="section" id="ai">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">04</span>AI 助手（可选）</p>
@@ -488,8 +482,7 @@
             </div>
         </section>
 
-        <!-- 05 数据与隐私 -->
-        <section class="section" id="privacy">
+<section class="section" id="privacy">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">05</span>数据与隐私</p>
@@ -590,8 +583,7 @@
             </div>
         </section>
 
-        <!-- 06 自建同步：可选，默认关闭 -->
-        <section class="section" id="sync">
+<section class="section" id="sync">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">06</span>自建同步（可选）</p>
@@ -684,8 +676,7 @@
             </div>
         </section>
 
-        <!-- 07 快捷键 -->
-        <section class="section" id="shortcuts">
+<section class="section" id="shortcuts">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">07</span>快捷键</p>
@@ -719,8 +710,7 @@
             </div>
         </section>
 
-        <!-- 08 下载 -->
-        <section class="section" id="download">
+<section class="section" id="download">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">08</span>下载</p>
@@ -839,8 +829,7 @@
         <svg class="icon sm" aria-hidden="true"><use href="#i-up"/></svg>
     </button>
 
-    <!-- 截图预览：所有 .frame-body 复用同一份遮罩 -->
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="截图预览" hidden>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="截图预览" hidden>
         <button class="lightbox-close" id="lightbox-close" type="button" aria-label="关闭预览">
             <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
         </button>

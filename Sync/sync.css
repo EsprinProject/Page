@@ -1,12 +1,7 @@
-/* EsprinSync 官网样式
-   令牌与通用组件取自母站 Page/styles.css，本文件只放本页专有的片段。 */
-
-/* 静态帧体：与可点击放大的截图帧共用外框，但不带缩放指针 */
 .frame-static {
     cursor: default;
 }
 
-/* 启动输出：级别标签弱化，正文走等宽字体 */
 .term {
     padding: 16px;
     font-family: var(--font-mono);
@@ -20,7 +15,6 @@
     color: var(--text-muted);
 }
 
-/* 管理后台分节：按管理页的实际分节列出 */
 .admin-list {
     display: flex;
     flex-direction: column;

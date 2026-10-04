@@ -1,6 +1,3 @@
-/* EsprinNemo 官网交互
-   仅维护页面自身状态：主题、顶栏与移动端导航、截图预览、版本号。 */
-
 (function () {
     'use strict';
 
@@ -16,10 +13,7 @@
 
     var root = document.documentElement;
 
-    /* --------------------------------------------------------------
-       主题：浅色 / 深色 / 跟随系统三态循环，与应用内保持一致
-       -------------------------------------------------------------- */
-    function readTheme() {
+function readTheme() {
         try {
             var stored = localStorage.getItem(THEME_KEY);
             return THEME_ORDER.indexOf(stored) >= 0 ? stored : 'system';
@@ -32,7 +26,7 @@
         try {
             localStorage.setItem(THEME_KEY, value);
         } catch (e) {
-            /* 隐私模式下忽略 */
+
         }
     }
 
@@ -77,8 +71,7 @@
             });
         }
 
-        // 跟随系统时，系统主题变化要即时生效
-        var media = window.matchMedia('(prefers-color-scheme: light)');
+var media = window.matchMedia('(prefers-color-scheme: light)');
         var onMediaChange = function () {
             if (theme === 'system') renderTheme();
         };
@@ -88,10 +81,7 @@
         renderTheme();
     }
 
-    /* --------------------------------------------------------------
-       提示条：与应用内 Toast 同款
-       -------------------------------------------------------------- */
-    var toastTimer = null;
+var toastTimer = null;
 
     function showToast(message) {
         var box = document.getElementById('toast-box');
@@ -115,10 +105,7 @@
         }, 2200);
     }
 
-    /* --------------------------------------------------------------
-       顶栏与移动端导航
-       -------------------------------------------------------------- */
-    function setupHeader() {
+function setupHeader() {
         var header = document.querySelector('.site-header');
         if (!header) return;
 
@@ -154,8 +141,7 @@
             toggle.focus();
         });
 
-        // 视口放大到顶栏导航可见时收起抽屉，避免两套导航同时出现
-        var media = window.matchMedia('(min-width: 941px)');
+var media = window.matchMedia('(min-width: 941px)');
         var onMediaChange = function () {
             if (media.matches) setOpen(false);
         };
@@ -163,10 +149,7 @@
         else if (media.addListener) media.addListener(onMediaChange);
     }
 
-    /* --------------------------------------------------------------
-       入场动画与锚点高亮
-       -------------------------------------------------------------- */
-    function setupReveal() {
+function setupReveal() {
         var items = document.querySelectorAll('.reveal');
         if (!('IntersectionObserver' in window)) {
             items.forEach(function (item) { item.classList.add('visible'); });
@@ -188,7 +171,7 @@
     }
 
     function setupNavHighlight() {
-        // 导航内混有指向母站与网页版的整页链接，只有页内锚点参与高亮
+
         var links = Array.prototype.slice.call(document.querySelectorAll('#site-nav .nav-link'))
             .filter(function (link) {
                 var href = link.getAttribute('href') || '';
@@ -212,10 +195,7 @@
         sections.forEach(function (section) { observer.observe(section); });
     }
 
-    /* --------------------------------------------------------------
-       复制、截图预览与回到顶部
-       -------------------------------------------------------------- */
-    function copyText(text) {
+function copyText(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             return navigator.clipboard.writeText(text);
         }
@@ -302,10 +282,7 @@
         });
     }
 
-    /* --------------------------------------------------------------
-       版本号：读发布页的最新 tag，取不到时保留页面中的静态版本
-       -------------------------------------------------------------- */
-    function formatDate(value) {
+function formatDate(value) {
         var date = new Date(value);
         if (isNaN(date.getTime())) return '';
         var pad = function (part) { return (part < 10 ? '0' : '') + part; };

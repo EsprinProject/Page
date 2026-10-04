@@ -1,8 +1,3 @@
-/* EsprinNemo 官网样式
-   设计令牌与应用端 src/renderer/styles/tokens.css 一致，控件（按钮、输入框、色板、Toast）
-   也沿用应用内的写法；版式为站点自有，不再复刻应用窗口的标题栏与标签栏。 */
-
-/* 品牌字体：与应用标题栏同款的 Mohave 可变字重字体 */
 @font-face {
     font-family: 'Mohave';
     src: url('https://raw.githubusercontent.com/EsprinProject/Nemo/main/src/renderer/fonts/Mohave/Mohave-VariableFont_wght.ttf') format('truetype-variations'),
@@ -12,9 +7,6 @@
     font-display: swap;
 }
 
-/* ------------------------------------------------------------------
-   设计令牌
-   ------------------------------------------------------------------ */
 :root {
     --bg-body: #0b0f14;
     --bg-titlebar: #111721;
@@ -47,8 +39,7 @@
     --font-sans: var(--font-ui-latin), var(--font-ui-cjk), sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, "Fira Code", monospace;
 
-    /* 站点专用令牌 */
-    --container: 1120px;
+--container: 1120px;
     --header-h: 56px;
     --line-soft: rgba(255, 255, 255, 0.06);
     --glow: radial-gradient(closest-side, rgba(88, 166, 255, 0.16), transparent);
@@ -85,16 +76,12 @@ html.light {
     --code-bg: rgba(110, 118, 129, 0.12);
 }
 
-/* ------------------------------------------------------------------
-   基础重置
-   ------------------------------------------------------------------ */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-/* hidden 属性优先于组件自身的 display，否则 .lightbox 一类作者样式会盖过 UA 规则 */
 [hidden] {
     display: none !important;
 }
@@ -114,7 +101,6 @@ body {
     overflow-x: hidden;
 }
 
-/* 页面底纹：与应用工作区一样的极细网格，向上淡出 */
 body::before {
     content: '';
     position: fixed;
@@ -185,7 +171,6 @@ input {
     background: var(--accent-bg);
 }
 
-/* 图标：内联 SVG 精灵，线宽与圆角对齐 Material Symbols Rounded 的观感 */
 .icon {
     width: 18px;
     height: 18px;
@@ -205,9 +190,6 @@ input {
 .icon.lg { width: 22px; height: 22px; }
 .sprite { display: none; }
 
-/* ------------------------------------------------------------------
-   排版
-   ------------------------------------------------------------------ */
 h1,
 h2,
 h3,
@@ -216,7 +198,6 @@ h4 {
     line-height: 1.35;
 }
 
-/* 行内代码：与应用文档区一致的浅底等宽样式 */
 code {
     font-family: var(--font-mono);
     font-size: 0.92em;
@@ -255,9 +236,6 @@ kbd {
     top: 12px;
 }
 
-/* ------------------------------------------------------------------
-   布局
-   ------------------------------------------------------------------ */
 .container {
     width: 100%;
     max-width: var(--container);
@@ -276,7 +254,6 @@ section {
     scroll-margin-top: calc(var(--header-h) + 20px);
 }
 
-/* 区块以细线分隔，形成说明书式的段落节奏 */
 .section {
     padding: 92px 0;
     border-top: 1px solid var(--line-soft);
@@ -329,10 +306,6 @@ section {
     max-width: 62ch;
 }
 
-/* ------------------------------------------------------------------
-   通用控件
-   ------------------------------------------------------------------ */
-/* 按钮类同时用于 <button> 与 <a>，所以布局属性必须写全（不能依赖 button 的重置） */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -404,15 +377,12 @@ section {
     color: var(--text-primary);
 }
 
-/* ------------------------------------------------------------------
-   顶栏
-   ------------------------------------------------------------------ */
 .site-header {
     position: sticky;
     top: 0;
     z-index: 300;
     border-bottom: 1px solid transparent;
-    /* 支持 color-mix 的浏览器上做半透明毛玻璃，不支持时回落到纯色 */
+
     background-color: var(--bg-body);
     background-color: color-mix(in srgb, var(--bg-body) 82%, transparent);
     backdrop-filter: saturate(160%) blur(12px);
@@ -493,7 +463,6 @@ section {
     display: none;
 }
 
-/* 网页版入口：宽度不足时收成仅图标，与相邻的图标按钮同宽 */
 @media (max-width: 1240px) {
     .header-web {
         padding: 0 9px;
@@ -503,7 +472,6 @@ section {
     }
 }
 
-/* 移动端导航：展开时占据顶栏以下整宽 */
 .mobile-nav {
     border-top: 1px solid var(--border-color);
     background-color: var(--bg-list);
@@ -519,9 +487,6 @@ section {
     font-size: 14px;
 }
 
-/* ------------------------------------------------------------------
-   首屏：左文案 / 右真机截图，下方为规格条
-   ------------------------------------------------------------------ */
 .hero {
     padding: 72px 0 0;
     position: relative;
@@ -594,7 +559,6 @@ section {
     color: var(--text-muted);
 }
 
-/* 规格条：四格并列，单元格之间以细线分隔 */
 .spec-strip {
     margin-top: 64px;
     display: grid;
@@ -623,9 +587,6 @@ section {
     color: var(--text-primary);
 }
 
-/* ------------------------------------------------------------------
-   截图框：全站展示应用截图的统一容器
-   ------------------------------------------------------------------ */
 .frame {
     margin: 0;
     border: 1px solid var(--border-color);
@@ -695,7 +656,6 @@ section {
     background-color: var(--bg-sidebar);
 }
 
-/* 放大预览：遮罩由脚本按 .frame-body 的 data-shot 复用 */
 .lightbox {
     position: fixed;
     inset: 0;
@@ -739,9 +699,6 @@ section {
     color: #ffffff;
 }
 
-/* ------------------------------------------------------------------
-   功能单元：以细线分格的网格
-   ------------------------------------------------------------------ */
 .cell-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -775,7 +732,6 @@ section {
     color: var(--text-secondary);
 }
 
-/* 说明条目：用于并列陈述若干外观事实 */
 .notes {
     margin-top: 40px;
     padding-top: 32px;
@@ -797,10 +753,6 @@ section {
     color: var(--text-secondary);
 }
 
-
-/* ------------------------------------------------------------------
-   分栏内容（随口记 / AI 助手 / 数据与隐私 / 自建同步）
-   ------------------------------------------------------------------ */
 .split {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -857,7 +809,6 @@ section {
     padding: 0 14px 14px;
 }
 
-/* 同步流程 */
 .steps {
     list-style: none;
     display: flex;
@@ -890,7 +841,6 @@ section {
     color: var(--text-secondary);
 }
 
-/* 对话面板示意 */
 .chat {
     padding: 16px 14px 6px;
     display: flex;
@@ -960,7 +910,6 @@ section {
     color: var(--text-muted);
 }
 
-/* 聆听条示意 */
 .voice-demo {
     padding: 16px 14px 6px;
 }
@@ -1033,9 +982,6 @@ section {
     color: var(--text-muted);
 }
 
-/* ------------------------------------------------------------------
-   命令行代码块与元数据片段
-   ------------------------------------------------------------------ */
 .code-block {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -1067,7 +1013,6 @@ section {
 .code-block .cmt { color: var(--text-muted); }
 .code-block .cmd { color: var(--text-primary); }
 
-/* 笔记元数据注释片：排版与应用内文档区一致 */
 .code-snippet {
     background-color: var(--code-bg);
     border: 1px solid var(--border-light);
@@ -1081,9 +1026,6 @@ section {
     overflow-x: auto;
 }
 
-/* ------------------------------------------------------------------
-   表格
-   ------------------------------------------------------------------ */
 .table-wrap {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -1123,9 +1065,6 @@ tbody tr:hover td {
     background-color: var(--item-hover);
 }
 
-/* ------------------------------------------------------------------
-   下载
-   ------------------------------------------------------------------ */
 .download-card {
     padding: 32px;
     background-color: var(--bg-list);
@@ -1194,9 +1133,6 @@ tbody tr:hover td {
     color: var(--text-secondary);
 }
 
-/* ------------------------------------------------------------------
-   页脚
-   ------------------------------------------------------------------ */
 .site-footer {
     border-top: 1px solid var(--line-soft);
     background-color: var(--bg-titlebar);
@@ -1262,7 +1198,6 @@ tbody tr:hover td {
     color: var(--text-primary);
 }
 
-/* 回到顶部 */
 .back-top {
     position: fixed;
     right: 20px;
@@ -1283,9 +1218,6 @@ tbody tr:hover td {
     border-color: var(--text-muted);
 }
 
-/* ------------------------------------------------------------------
-   Toast：与应用内的提示条同款
-   ------------------------------------------------------------------ */
 .toast-box {
     position: fixed;
     bottom: 20px;
@@ -1313,9 +1245,6 @@ tbody tr:hover td {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ------------------------------------------------------------------
-   入场动画
-   ------------------------------------------------------------------ */
 .reveal {
     opacity: 0;
     transform: translateY(14px);
@@ -1326,9 +1255,6 @@ tbody tr:hover td {
     transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ------------------------------------------------------------------
-   响应式
-   ------------------------------------------------------------------ */
 @media (max-width: 1060px) {
     .hero-grid { gap: 40px; }
     .nav-link { padding: 0 9px; }

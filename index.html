@@ -18,12 +18,12 @@
     <link rel="stylesheet" href="./styles.css">
     <noscript><style>.reveal { opacity: 1; transform: none; } .nav-toggle { display: none; }</style></noscript>
     <script>
-        /* 首屏渲染前同步注入主题，与应用内 boot.js 的做法一致，避免闪屏 */
+
         (function () {
             var root = document.documentElement;
 
             var stored = null;
-            try { stored = localStorage.getItem('en-site-theme'); } catch (e) { /* 隐私模式下忽略 */ }
+            try { stored = localStorage.getItem('en-site-theme'); } catch (e) {  }
             var light = stored === 'light'
                 || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: light)').matches);
             if (light) root.classList.add('light');
@@ -31,7 +31,7 @@
     </script>
 </head>
 <body>
-    <!-- 图标精灵：线宽与圆角对齐应用内 Material Symbols Rounded 的观感 -->
+
     <svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
         <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="11" rx="2"/><path d="M2 19h20"/></symbol>
         <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.2 2.4 3.3 5.3 3.3 8.5S14.2 18.1 12 20.5c-2.2-2.4-3.3-5.3-3.3-8.5S9.8 5.9 12 3.5Z"/></symbol>
@@ -57,8 +57,7 @@
 
     <a class="skip-link" href="#main">跳到主要内容</a>
 
-    <!-- 顶栏：全站唯一的固定导航 -->
-    <header class="site-header" id="top">
+<header class="site-header" id="top">
         <div class="container header-inner">
             <a class="brand" href="#top">
                 <img src="https://raw.githubusercontent.com/EsprinProject/Logos/main/Main.new.svg" width="22" height="22" alt="">
@@ -96,8 +95,7 @@
             </div>
         </div>
 
-        <!-- 移动端导航：与顶栏共用同一批锚点 -->
-        <div class="mobile-nav" id="mobile-nav" hidden>
+<div class="mobile-nav" id="mobile-nav" hidden>
             <nav class="container" aria-label="站点导航（移动端）">
                 <a class="nav-link" href="./Nemo/">Nemo 官网</a>
                 <a class="nav-link" href="./Sync/">Sync 官网</a>
@@ -112,7 +110,7 @@
     </header>
 
     <main id="main">
-        <!-- 首屏：左文案 / 右真机截图，下方为规格条 -->
+
         <section class="hero">
             <div class="container hero-grid">
                 <div class="hero-copy">
@@ -180,8 +178,7 @@
             </div>
         </section>
 
-        <!-- 01 组件：三个仓库各自独立，共用同一套数据格式 -->
-        <section class="section" id="products">
+<section class="section" id="products">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">01</span>组件</p>
@@ -273,8 +270,7 @@
             </div>
         </section>
 
-        <!-- 02 组成：数据流向与两个客户端的关系 -->
-        <section class="section" id="architecture">
+<section class="section" id="architecture">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">02</span>组成</p>
@@ -368,8 +364,7 @@
             </div>
         </section>
 
-        <!-- 03 设计：两个核心设计 -->
-        <section class="section" id="design">
+<section class="section" id="design">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">03</span>设计</p>
@@ -430,8 +425,7 @@
             </div>
         </section>
 
-        <!-- 04 上手：三条路径 -->
-        <section class="section" id="start">
+<section class="section" id="start">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">04</span>上手</p>
@@ -544,8 +538,7 @@
             </div>
         </section>
 
-        <!-- 05 仓库 -->
-        <section class="section" id="repos">
+<section class="section" id="repos">
             <div class="container">
                 <header class="section-head reveal">
                     <p class="eyebrow"><span class="eyebrow-index">05</span>仓库</p>
@@ -663,8 +656,7 @@
         <svg class="icon sm" aria-hidden="true"><use href="#i-up"/></svg>
     </button>
 
-    <!-- 截图预览：所有 .frame-body 复用同一份遮罩 -->
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="截图预览" hidden>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="截图预览" hidden>
         <button class="lightbox-close" id="lightbox-close" type="button" aria-label="关闭预览">
             <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
         </button>
